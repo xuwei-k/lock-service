@@ -21,6 +21,8 @@ val commonSettings = Seq(
   )
 )
 
+updateConfiguration in updateSbtClassifiers := (updateConfiguration in updateSbtClassifiers).value.withMissingOk(true)
+
 val protoSettings = Seq(
   PB.targets in Compile := Seq(
     scalapb.gen(flatPackage = true) -> (sourceManaged in Compile).value
