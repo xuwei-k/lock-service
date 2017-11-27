@@ -5,6 +5,7 @@ import com.google.protobuf.duration.Duration
 import com.typesafe.scalalogging.StrictLogging
 import etcdserverpb._
 import io.grpc.Status
+import io.grpc.protobuf.StatusProto
 import jp.jyane.lock._
 import jp.jyane.lock.exception.{AlreadyExistsException, FailedPreconditionException, InvalidArgumentException}
 import jyane.lock._
@@ -54,7 +55,11 @@ trait LockServiceImpl extends LockServiceGrpc.LockService with UseChannels with 
     case e: AlreadyExistsException =>
       throw Status.ALREADY_EXISTS.withDescription(e.getMessage).asRuntimeException()
     case e: InvalidArgumentException =>
-      throw Status.INVALID_ARGUMENT.withDescription(e.getMessage).asRuntimeException()
+      // throw Status.INVALID_ARGUMENT.withDescription(e.getMessage).asRuntimeException()
+      val error = com.google.rpc.Status.newBuilder()
+        .setCode(com.google.rpc.Code.INVALID_ARGUMENT_VALUE)
+        .build()
+      throw StatusProto.toStatusRuntimeException(error)
     case NonFatal(e) =>
       logger.error("internal error", e)
       throw Status.INTERNAL.asRuntimeException()
